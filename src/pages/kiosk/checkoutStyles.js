@@ -152,7 +152,7 @@ export const CheckoutLayout = styled.div`
   .payment-grid button {
     position: absolute; display: flex; align-items: center; justify-content: center; flex-direction: column;
     width: calc(532 * var(--u)); height: calc(250 * var(--u)); box-shadow: inset 0 0 0 var(--u) #020352ba;
-    background: var(--paper); font-weight: 500; font-size: calc(40 * var(--u)); line-height: normal;
+    background: white; font-weight: 500; font-size: calc(40 * var(--u)); line-height: normal;
   }
   .payment-grid button small { display: block; font-weight: 400; font-size: calc(28 * var(--u)); }
   .payment-grid .wide { width: 100%; flex-direction: row; }

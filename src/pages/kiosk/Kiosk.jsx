@@ -152,6 +152,7 @@ export default function Kiosk() {
 
   return (
     <KioskFrame
+      data-screen={screen}
       data-simple={profile.simple}
       data-contrast={profile.contrast}
       data-guidance={profile.guidance}

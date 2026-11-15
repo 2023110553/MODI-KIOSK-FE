@@ -172,7 +172,7 @@ export default function Kiosk() {
         </>
       ) : (
         <>
-          {screen === 'complete' ? <div className="toolbar" /> : (
+          {screen === 'complete' ? <KioskToolbar helpOnly /> : (
             <KioskToolbar
               onHome={['card', 'remove-card'].includes(screen) ? undefined : reset}
               detail={screen !== 'menu'}

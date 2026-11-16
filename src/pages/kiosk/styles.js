@@ -77,9 +77,9 @@ export const KioskFrame = styled.main`
   .start-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 1.48cqw; height: 27.78cqw; }
   .start-actions button {
     display: flex; align-items: center; justify-content: center; gap: 1cqw;
-    font-size: 5.56cqw; font-weight: 800; color: var(--paper); background: var(--sage);
+    font-size: 5.56cqw; font-weight: 800; color: #fff; background: #b9b9b9;
   }
-  .start-actions button + button { background: var(--accent); }
+  .start-actions button + button { background: #000; }
   .start-actions img { width: auto; height: 8.5cqw; }
 
   .steps {

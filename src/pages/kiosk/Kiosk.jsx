@@ -164,16 +164,35 @@ if (!response.ok) {
 }
 
 const responseData = JSON.parse(responseText);
-console.log('[NFC] 응답 데이터:', responseData);
-      // 백엔드에서 반환된 접근성 프로필을 프론트엔드 상태에 반영
-      setProfile({
-        simple: profileData.lowerScreen ?? defaultProfile.simple,
-        contrast: profileData.highContrast ?? defaultProfile.contrast,
-        guidance: profileData.touchGuide ?? defaultProfile.guidance,
-        reach: profileData.lowerScreen ?? defaultProfile.reach,
-      })
+console.log('[NFC] 서버 응답:', responseData);
 
-      console.log('접근성 프로필 적용 완료:', profileData)
+const kioskData = responseData.data;
+
+if (!kioskData) {
+  throw new Error('서버 응답에 키오스크 데이터가 없습니다.');
+}
+
+// 실제 접근성 설정이 들어 있는 위치 확인
+console.log('[NFC] kioskData:', kioskData);
+
+const profileData = kioskData.profile ?? kioskData.settings;
+
+if (!profileData) {
+  throw new Error(
+    '서버 응답에서 접근성 프로필을 찾을 수 없습니다.'
+  );
+}
+
+setProfile({
+  ...defaultProfile,
+  // 현재 프론트의 simple 옵션에 대응하는
+  // 백엔드 필드는 아직 확인이 필요함
+  contrast: profileData.highContrast ?? defaultProfile.contrast,
+  guidance: profileData.touchGuide ?? defaultProfile.guidance,
+  reach: profileData.lowerScreen ?? defaultProfile.reach,
+});
+
+console.log('접근성 프로필 적용 완료:', profileData);
     } catch (error) {
   console.error('NFC 연동 에러:', error);
   console.error('에러 이름:', error?.name);

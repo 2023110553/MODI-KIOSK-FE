@@ -63,6 +63,26 @@ function PreviewSettings({ profile, onChange }) {
 }
 
 const figmaUnit = (pixels) => `${pixels / 10.8}cqw`
+const LARGE_TEXT_PAGE_SIZE = 9
+
+/* 큰 글씨: 한 페이지 16개로 나뉜 메뉴를 9개(3 x 3)씩 다시 나눔 */
+function paginate(pages, large) {
+  if (!large) return pages
+  const items = pages.flat()
+  return Array.from({ length: Math.ceil(items.length / LARGE_TEXT_PAGE_SIZE) }, (_, index) => (
+    items.slice(index * LARGE_TEXT_PAGE_SIZE, (index + 1) * LARGE_TEXT_PAGE_SIZE)
+  ))
+}
+
+/* 큰 글씨: 한 줄을 넘는 카테고리를 오른쪽으로 넘겨 보는 버튼 */
+function MoreButton({ label }) {
+  return (
+    <button className="row-more" aria-label={`${label} 더 보기`}
+      onClick={(event) => event.currentTarget.parentElement.scrollBy({ left: event.currentTarget.parentElement.clientWidth * .7, behavior: 'smooth' })}>
+      &gt;
+    </button>
+  )
+}
 const compactLabels = new Set([
   '솔티드 카라멜 라떼',
   '부드러운 고구마 생크림 케이크(쁘띠)',
@@ -106,8 +126,9 @@ export default function Kiosk() {
   const count = cart.reduce((sum, item) => sum + item.quantity, 0)
   const total = cart.reduce((sum, item) => sum + item.quantity * item.price, 0)
   const sections = Object.keys(catalog[category])
-  const pages = catalog[category][section] ?? []
-  const products = pages[page] ?? []
+  const pages = paginate(catalog[category][section] ?? [], profile.large)
+  const currentPage = Math.min(page, Math.max(pages.length - 1, 0))
+  const products = pages[currentPage] ?? []
   const step = screen === 'complete' ? 2 : screen === 'payment' ? 1 : 0
   const showSteps = ['menu', 'review', 'payment', 'complete'].includes(screen)
 
@@ -214,6 +235,7 @@ console.log('[NFC] 응답 데이터:', responseData);
       data-contrast={profile.contrast}
       data-guidance={profile.guidance}
       data-reach={profile.reach}
+      data-large={profile.large}
     >
       {import.meta.env.DEV && new URLSearchParams(globalThis.location?.search).has('preview') && (
         <PreviewSettings profile={profile} onChange={(key, value) => setProfile((current) => ({ ...current, [key]: value }))} />
@@ -250,6 +272,7 @@ console.log('[NFC] 응답 데이터:', responseData);
                 {categories.map((label) => (
                   <button key={label} aria-pressed={label === category} onClick={() => selectCategory(label)}>{label}</button>
                 ))}
+                {profile.large && <MoreButton label="메뉴 카테고리" />}
               </nav>
               <section className="catalog" aria-label="메뉴 목록">
                 <nav className="subcategories" aria-label={`${category} 세부 메뉴`}>
@@ -259,6 +282,7 @@ console.log('[NFC] 응답 데이터:', responseData);
                       setPage(0)
                     }}>{label}</button>
                   ))}
+                  {profile.large && sections.length > 3 && <MoreButton label="세부 메뉴" />}
                 </nav>
                 <div className="product-grid">
                   {products.map((entry) => {
@@ -268,9 +292,9 @@ console.log('[NFC] 응답 데이터:', responseData);
                 </div>
                 {pages.length > 0 && (
                   <nav className="pagination" aria-label="메뉴 페이지">
-                    <button disabled={page === 0} onClick={() => setPage(page - 1)}>&lt; 이전</button>
-                    <span>{page + 1} / {pages.length}</span>
-                    <button disabled={page + 1 === pages.length} onClick={() => setPage(page + 1)}>다음 &gt;</button>
+                    <button disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>&lt; 이전</button>
+                    <span>{currentPage + 1} / {pages.length}</span>
+                    <button disabled={currentPage + 1 === pages.length} onClick={() => setPage(currentPage + 1)}>다음 &gt;</button>
                   </nav>
                 )}
               </section>

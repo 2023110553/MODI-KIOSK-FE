@@ -93,7 +93,7 @@ export default function ProductOptions({ product, service, onClose, onAdd, child
           </div>
           <footer className="detail-actions">
             <button onClick={() => setDraft(null)}>이전</button>
-            <button data-guide onClick={() => { setPersonal(draft); setDraft(null) }}>퍼스널옵션저장</button>
+            <button data-guide data-guide-label="옵션을 다 고르셨으면 눌러 주세요" onClick={() => { setPersonal(draft); setDraft(null) }}>퍼스널옵션저장</button>
           </footer>
         </div>
       </dialog>
@@ -155,7 +155,7 @@ export default function ProductOptions({ product, service, onClose, onAdd, child
         </div>
         <footer className="detail-actions">
           <button onClick={onClose}>주문 취소</button>
-          <button data-guide onClick={addItem}>메뉴담기</button>
+          <button data-guide data-guide-label="장바구니에 담으려면 눌러 주세요" onClick={addItem}>메뉴담기</button>
         </footer>
       </div>
     </dialog>

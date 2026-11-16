@@ -2,6 +2,7 @@ import { createGlobalStyle, styled } from 'styled-components'
 import interFont from '../../assets/kiosk/InterVariable.woff2'
 import { contrastStyles } from './contrastStyles.js'
 import { guidanceStyles } from './guidanceStyles.js'
+import { largeTextStyles } from './largeTextStyles.js'
 
 export const KioskGlobalStyle = createGlobalStyle`
   @font-face {
@@ -297,5 +298,6 @@ export const KioskFrame = styled.main`
   .bubble-choice:has(input:focus-visible) { outline: 2px solid #3260d9; }
 
   ${contrastStyles}
+  ${largeTextStyles}
   ${guidanceStyles}
 `

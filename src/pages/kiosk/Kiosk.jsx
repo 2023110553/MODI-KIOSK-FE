@@ -152,6 +152,7 @@ export default function Kiosk() {
 
   return (
     <KioskFrame
+      data-screen={screen}
       data-simple={profile.simple}
       data-contrast={profile.contrast}
       data-guidance={profile.guidance}
@@ -171,7 +172,7 @@ export default function Kiosk() {
         </>
       ) : (
         <>
-          {screen === 'complete' ? <div className="toolbar" /> : (
+          {screen === 'complete' ? <KioskToolbar helpOnly /> : (
             <KioskToolbar
               onHome={['card', 'remove-card'].includes(screen) ? undefined : reset}
               detail={screen !== 'menu'}

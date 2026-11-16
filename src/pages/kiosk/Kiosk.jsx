@@ -166,8 +166,8 @@ export default function Kiosk() {
           <StartPhotos />
           <KioskToolbar startScreen />
           <div className="start-actions">
-            <button onClick={() => start('매장')}><img src={kioskImage('dine-in')} alt="" />매장</button>
-            <button onClick={() => start('포장')}><img src={kioskImage('takeout')} alt="" />포장</button>
+            <button data-guide data-guide-label="매장 이용 시 눌러 주세요" onClick={() => start('매장')}><img src={kioskImage('dine-in')} alt="" />매장</button>
+            <button data-guide data-guide-label="포장하실 때 눌러 주세요" onClick={() => start('포장')}><img src={kioskImage('takeout')} alt="" />포장</button>
           </div>
         </>
       ) : (
@@ -229,7 +229,7 @@ export default function Kiosk() {
               <footer className="order-bar">
                 <div><span>총 수량</span><strong>{count}<small>개</small></strong></div>
                 <div><span>합계</span><strong>{total.toLocaleString('ko-KR')}<small>원</small></strong></div>
-                <button disabled={!count} onClick={() => setScreen('desserts')}>주문하기</button>
+                <button disabled={!count} data-guide={count > 0 || undefined} data-guide-label="다 고르셨으면 눌러 주세요" onClick={() => setScreen('desserts')}>주문하기</button>
               </footer>
             </>
           ) : (

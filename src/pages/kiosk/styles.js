@@ -3,6 +3,7 @@ import interFont from '../../assets/kiosk/InterVariable.woff2'
 import { contrastStyles } from './contrastStyles.js'
 import { guidanceStyles } from './guidanceStyles.js'
 import { largeTextStyles } from './largeTextStyles.js'
+import { lowerControlsStyles } from './lowerControlsStyles.js'
 
 export const KioskGlobalStyle = createGlobalStyle`
   @font-face {
@@ -300,4 +301,5 @@ export const KioskFrame = styled.main`
   ${contrastStyles}
   ${largeTextStyles}
   ${guidanceStyles}
+  ${lowerControlsStyles}
 `

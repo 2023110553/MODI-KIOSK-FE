@@ -64,13 +64,14 @@ function PreviewSettings({ profile, onChange }) {
 
 const figmaUnit = (pixels) => `${pixels / 10.8}cqw`
 const LARGE_TEXT_PAGE_SIZE = 9
+const LOWER_CONTROLS_PAGE_SIZE = 6
+const LOWER_CONTROLS_LARGE_PAGE_SIZE = 4
 
-/* 큰 글씨: 한 페이지 16개로 나뉜 메뉴를 9개(3 x 3)씩 다시 나눔 */
-function paginate(pages, large) {
-  if (!large) return pages
+function paginate(pages, pageSize) {
+  if (!pageSize) return pages
   const items = pages.flat()
-  return Array.from({ length: Math.ceil(items.length / LARGE_TEXT_PAGE_SIZE) }, (_, index) => (
-    items.slice(index * LARGE_TEXT_PAGE_SIZE, (index + 1) * LARGE_TEXT_PAGE_SIZE)
+  return Array.from({ length: Math.ceil(items.length / pageSize) }, (_, index) => (
+    items.slice(index * pageSize, (index + 1) * pageSize)
   ))
 }
 
@@ -126,11 +127,19 @@ export default function Kiosk() {
   const count = cart.reduce((sum, item) => sum + item.quantity, 0)
   const total = cart.reduce((sum, item) => sum + item.quantity * item.price, 0)
   const sections = Object.keys(catalog[category])
-  const pages = paginate(catalog[category][section] ?? [], profile.large)
+  const lowerControls = profile.reach && screen === 'menu'
+  const pageSize = lowerControls
+    ? (profile.large ? LOWER_CONTROLS_LARGE_PAGE_SIZE : LOWER_CONTROLS_PAGE_SIZE)
+    : (profile.large ? LARGE_TEXT_PAGE_SIZE : null)
+  const pages = paginate(catalog[category][section] ?? [], pageSize)
   const currentPage = Math.min(page, Math.max(pages.length - 1, 0))
   const products = pages[currentPage] ?? []
+  const selectedMenu = lowerControls ? cart.at(-1) : null
   const step = screen === 'complete' ? 2 : screen === 'payment' ? 1 : 0
   const showSteps = ['menu', 'review', 'payment', 'complete'].includes(screen)
+  const stepLabels = lowerControls && profile.large
+    ? ['메뉴선택', '적립하기', '결제하기', '주문완료']
+    : ['메뉴선택', '결제하기', '주문완료']
 
   // 2. NFC 태그 감지 시 실행될 비동기 핸들러 (백엔드 API 연동)
   const onTagScanned = async (uid) => {
@@ -277,31 +286,42 @@ console.log('접근성 프로필 적용 완료:', profileData);
               helpOnly={['card', 'remove-card'].includes(screen)}
             />
           )}
-          {showSteps && <ol className="steps" aria-label="주문 단계">
-            {['메뉴선택', '결제하기', '주문완료'].map((label, index) => (
+          {(lowerControls || (profile.reach && screen === 'payment')) && (
+            <aside className="lower-controls-guide">
+              <img src={kioskImage('lower-controls-guide')} alt="" />
+              <p>아래에서 편하게<br />선택하세요</p>
+            </aside>
+          )}
+          {showSteps && (!lowerControls || profile.large) && !(profile.reach && screen === 'payment') && <ol className="steps" aria-label="주문 단계">
+            {stepLabels.map((label, index) => (
               <li key={label} data-complete={index <= step} aria-current={index === step ? 'step' : undefined}>
                 {label}
                 <span className="step-dot">{index <= step && <img src={kioskImage('step-completed', 'svg')} alt="" />}</span>
               </li>
             ))}
           </ol>}
-          {screen === 'menu' ? (
-            <>
+          {(screen === 'menu' || (profile.reach && screen === 'payment')) && (
               <nav className="categories" aria-label="메뉴 카테고리">
                 {categories.map((label) => (
-                  <button key={label} aria-pressed={label === category} onClick={() => selectCategory(label)}>{label}</button>
+                  <button key={label} aria-pressed={label === category} onClick={() => {
+                    selectCategory(label)
+                    setScreen('menu')
+                  }}>{label}</button>
                 ))}
-                {profile.large && <MoreButton label="메뉴 카테고리" />}
+                {(profile.large || lowerControls) && <MoreButton label="메뉴 카테고리" />}
               </nav>
+          )}
+          {screen === 'menu' ? (
+            <>
               <section className="catalog" aria-label="메뉴 목록">
                 <nav className="subcategories" aria-label={`${category} 세부 메뉴`}>
-                  {sections.map((label) => (
+                  {(!lowerControls || sections.length !== 1 || sections[0] !== category) && sections.map((label) => (
                     <button key={label} aria-pressed={label === section} onClick={() => {
                       setSection(label)
                       setPage(0)
                     }}>{label}</button>
                   ))}
-                  {profile.large && sections.length > 3 && <MoreButton label="세부 메뉴" />}
+                  {(profile.large || lowerControls) && sections.length > 3 && <MoreButton label="세부 메뉴" />}
                 </nav>
                 <div className="product-grid">
                   {products.map((entry) => {
@@ -311,9 +331,19 @@ console.log('접근성 프로필 적용 완료:', profileData);
                 </div>
                 {pages.length > 0 && (
                   <nav className="pagination" aria-label="메뉴 페이지">
-                    <button disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>&lt; 이전</button>
+                    {lowerControls && (
+                      <div className="lower-controls-preview">
+                        {selectedMenu ? (
+                          <>
+                            <img src={kioskImage(selectedMenu.image)} alt="" />
+                            <span>{selectedMenu.name}</span>
+                          </>
+                        ) : <span>선택 메뉴</span>}
+                      </div>
+                    )}
+                    <button disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>{lowerControls ? '이전' : '< 이전'}</button>
                     <span>{currentPage + 1} / {pages.length}</span>
-                    <button disabled={currentPage + 1 === pages.length} onClick={() => setPage(currentPage + 1)}>다음 &gt;</button>
+                    <button disabled={currentPage + 1 === pages.length} onClick={() => setPage(currentPage + 1)}>{lowerControls ? '다음' : '다음 >'}</button>
                   </nav>
                 )}
               </section>
@@ -333,7 +363,7 @@ console.log('접근성 프로필 적용 완료:', profileData);
               </footer>
             </>
           ) : (
-            <Checkout screen={screen} navigate={setScreen} reset={reset} service={service} cart={cart}
+            <Checkout reach={profile.reach} screen={screen} navigate={setScreen} reset={reset} service={service} cart={cart}
               count={count} total={total} onAdd={addToCart} onQuantity={changeQuantity} onRemove={removeItem}
               onDessertMenu={() => { selectCategory('디저트'); setScreen('menu') }} />
           )}

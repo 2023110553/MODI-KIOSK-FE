@@ -267,14 +267,15 @@ export const KioskFrame = styled.main`
   .detail-actions button + button { box-shadow: none; background: #2d2d2d; color: white; }
   .detail-screen > .detail-actions { position: absolute; inset: auto 0 0; }
   .personal-summary .amount { position: absolute; top: calc(201 * var(--u)); left: 0; right: 0; height: calc(95 * var(--u)); font-size: calc(36 * var(--u)); }
-  .personal-summary .amount span { position: absolute; display: grid; white-space: nowrap; }
-  .personal-summary .amount span:nth-of-type(1) { left: calc(301 * var(--u)); }
-  .personal-summary .amount span:nth-of-type(2) { left: calc(599 * var(--u)); }
-  .personal-summary .amount span:nth-of-type(3) { left: calc(896 * var(--u)); }
-  .personal-summary .amount b { position: absolute; top: calc(22 * var(--u)); left: calc(556 * var(--u)); font-weight: 400; }
+  .personal-summary .amount > span { position: absolute; top: 0; display: grid; grid-template-rows: repeat(2, calc(44 * var(--u))); width: calc(143 * var(--u)); line-height: calc(44 * var(--u)); text-align: left; white-space: nowrap; }
+  .personal-summary .amount > span:nth-of-type(1) { left: calc(301 * var(--u)); }
+  .personal-summary .amount > span:nth-of-type(2) { left: calc(599 * var(--u)); }
+  .personal-summary .amount > span:nth-of-type(3) { left: calc(896 * var(--u)); }
+  .personal-summary .amount b { position: absolute; top: calc(22 * var(--u)); left: calc(556 * var(--u)); line-height: calc(44 * var(--u)); font-weight: 400; }
   .personal-summary .amount b:nth-of-type(2) { left: calc(853 * var(--u)); }
+
   .personal-summary .amount strong { font-weight: 400; }
-  .personal-summary .amount span:last-child strong { color: #2d2d2d; font-weight: 700; }
+  .personal-summary .amount > span:last-child strong { color: #000; font-weight: 600; }
   .personal-fields { position: absolute; inset: calc(444 * var(--u)) calc(39 * var(--u)) auto calc(40 * var(--u)); }
   .personal-heading { position: relative; height: calc(49 * var(--u)); text-align: center; font-size: calc(40 * var(--u)); }
   .personal-heading button { position: absolute; right: 0; top: calc(6 * var(--u)); width: calc(140 * var(--u)); height: calc(36 * var(--u)); box-shadow: inset 0 0 0 var(--u) var(--ink); background: white; font-size: calc(30 * var(--u)); font-weight: 200; }
@@ -285,7 +286,7 @@ export const KioskFrame = styled.main`
   .personal-choices:has(button:nth-child(4)) button { width: calc(104 * var(--u)); }
   .personal-choices button[aria-pressed='true'] { background: var(--ink); color: var(--paper); }
   .personal-heading button span, .personal-choices button span {
-    display: block; margin-inline: calc(-8 * var(--u)); white-space: nowrap; transform: scaleX(.9);
+    display: block; font-size: calc(27 * var(--u)); line-height: calc(32 * var(--u)); white-space: nowrap;
   }
   .bubble-choice { position: relative; cursor: pointer; display: flex; gap: calc(20 * var(--u)); align-items: center; margin-left: calc(7 * var(--u)); margin-right: auto; font-weight: 200; }
   .bubble-choice input { position: absolute; inset: 0 auto 0 0; width: calc(28 * var(--u)); margin: 0; opacity: 0; }

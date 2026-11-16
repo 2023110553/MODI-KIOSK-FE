@@ -6,6 +6,7 @@ import ProductOptions from './ProductOptions.jsx'
 import CartRows from './CartRows.jsx'
 import Checkout from './Checkout.jsx'
 import { KioskFrame } from './styles.js'
+import { useNfcInput } from '../../hooks/useNfcInput.js' // NFC 훅 임포트
 
 const START_PHOTO_MS = 5_000
 const startPhotos = ['hero', 'hero-mango', 'hero-matcha', 'hero-coffee']
@@ -109,6 +110,62 @@ export default function Kiosk() {
   const products = pages[page] ?? []
   const step = screen === 'complete' ? 2 : screen === 'payment' ? 1 : 0
   const showSteps = ['menu', 'review', 'payment', 'complete'].includes(screen)
+
+  // 2. NFC 태그 감지 시 실행될 비동기 핸들러 (백엔드 API 연동)
+  const onTagScanned = async (uid) => {
+    console.log('NFC UID 감지됨:', uid)
+
+    try {
+      // 백엔드 API 호출 (실제 백엔드 엔드포인트 주소에 맞게 조정)
+      const KIOSK_CODE = 'KIOSK-001';
+      const response = await fetch(
+  `/api/kiosks/${KIOSK_CODE}/nfc`,
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ uid }),
+  }
+);
+
+console.log('[NFC] HTTP 상태:', response.status);
+console.log('[NFC] 요청 URL:', response.url);
+
+const responseText = await response.text();
+
+console.log('[NFC] 서버 응답 원문:', responseText);
+
+if (!response.ok) {
+  throw new Error(
+    `NFC API 실패 (HTTP ${response.status}): ${responseText}`
+  );
+}
+
+const responseData = JSON.parse(responseText);
+console.log('[NFC] 응답 데이터:', responseData);
+      // 백엔드에서 반환된 접근성 프로필을 프론트엔드 상태에 반영
+      setProfile({
+        simple: profileData.lowerScreen ?? defaultProfile.simple,
+        contrast: profileData.highContrast ?? defaultProfile.contrast,
+        guidance: profileData.touchGuide ?? defaultProfile.guidance,
+        reach: profileData.lowerScreen ?? defaultProfile.reach,
+      })
+
+      console.log('접근성 프로필 적용 완료:', profileData)
+    } catch (error) {
+  console.error('NFC 연동 에러:', error);
+  console.error('에러 이름:', error?.name);
+  console.error('에러 메시지:', error?.message);
+  console.error('에러 스택:', error?.stack);
+
+  alert(`NFC 연동 실패: ${error?.message ?? '알 수 없는 오류'}`);
+}
+  }
+
+  //커스텀 훅 바인딩 (키오스크 모든 페이지에서 키보드 입력 형태의 NFC 감지 가능하게
+  useNfcInput({ onTagScanned })
+
 
   function selectCategory(label) {
     setCategory(label)

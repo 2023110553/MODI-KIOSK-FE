@@ -92,6 +92,9 @@ export const guidanceStyles = css`
       --guide-top: calc(16 * var(--u));
     }
     .card-instructions[data-guide='true'] { --guide-top: calc(440 * var(--u)); }
+    /* 주문 완료 화면: 영수증 버튼 말풍선과 붙지 않도록 '잊으신 물건이 없는지 확인하세요'를 조금 위로 */
+    .complete-message .order-warning { inset-block-start: calc(1262 * var(--u)); }
+
     /* 상품 옵션 화면: 메뉴담기 말풍선과 겹치지 않도록 '퍼스널옵션 더보기'를 조금 위로 */
     .detail-fields .personal-options { bottom: calc(32 * var(--u)); }
 

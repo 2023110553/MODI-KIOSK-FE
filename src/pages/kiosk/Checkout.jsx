@@ -20,17 +20,18 @@ function suggestion([name, price, image], quantity = 1) {
   return { key: `suggestion:${image}`, name, price, image, option: '', quantity }
 }
 
-function Actions({ back, backLabel = '이전', next, nextLabel, disabled, className = '' }) {
+function Actions({ back, backLabel = '이전', next, nextLabel, disabled, className = '', guide }) {
   return (
     <footer className={`detail-actions ${className}`}>
-      <button onClick={back}>{backLabel}</button>
-      {next && <button onClick={next} disabled={disabled}>{nextLabel}</button>}
+      <button onClick={back} data-guide={['back', 'both'].includes(guide) || undefined}>{backLabel}</button>
+      {next && <button onClick={next} disabled={disabled} data-guide={['next', 'both'].includes(guide) || undefined}>{nextLabel}</button>}
     </footer>
   )
 }
 
 function DessertSuggestions({ onAdd, onSkip, onMenu }) {
   const [quantities, setQuantities] = useState({})
+  const hasSelection = Object.values(quantities).some(Boolean)
 
   function change(image, delta) {
     setQuantities((current) => ({ ...current, [image]: Math.max(0, (current[image] ?? 0) + delta) }))
@@ -72,7 +73,7 @@ function DessertSuggestions({ onAdd, onSkip, onMenu }) {
           if (quantities[item[2]]) onAdd(suggestion(item, quantities[item[2]]))
         }
         onSkip()
-      }} nextLabel="추가할게요" />
+      }} nextLabel="추가할게요" guide={hasSelection ? 'next' : 'back'} />
     </section>
   )
 }
@@ -90,7 +91,7 @@ function PaymentMethods({ total, navigate }) {
       <section className="payment-methods">
         <h1>결제방법을 선택해주세요</h1>
         <div className="payment-grid">
-          <button className="wide" onClick={() => navigate('card')}><span className="payment-logo card-logo" /> 신용카드</button>
+          <button className="wide" data-guide data-guide-place="inside" onClick={() => navigate('card')}><span className="payment-logo card-logo" /> 신용카드</button>
           <button disabled>제휴카드</button>
           <button disabled>모바일상품권/기프트카드<br />카카오페이굿딜<img src={kioskImage('payment-gift')} alt="" /></button>
           <button className="wide easy-payment" disabled>
@@ -118,7 +119,7 @@ function CardPayment({ screen, navigate }) {
       <div className="card-title">
         {screen !== 'bell' && <><h1>신용카드 결제</h1><p>신용카드 혹은 모바일 페이로 결제 가능합니다<br />아래의 위치에 넣거나 대 주세요</p></>}
       </div>
-      <section className="card-instructions">
+      <section className="card-instructions" data-guide={screen === 'card' || undefined} data-guide-place="inside" data-guide-label="카드를 넣거나 대 주세요">
         {screen === 'bell' ? <Warning /> : <p>주문완료 메시지 확인 후 카드를 챙겨 주세요</p>}
       </section>
       <Actions back={() => navigate('payment')} />
@@ -164,7 +165,7 @@ export default function Checkout({ screen, navigate, reset, service, cart, count
             <div>총 수량 <strong>{count}<small>개</small></strong></div>
             <div>합계 <strong>{total.toLocaleString('ko-KR')}<small>원</small></strong></div>
           </div>
-          <Actions className="review-actions" back={() => navigate('menu')} next={() => navigate('payment')} nextLabel="결제하기" disabled={!count} />
+          <Actions className="review-actions" back={() => navigate('menu')} next={() => navigate('payment')} nextLabel="결제하기" disabled={!count} guide={count ? 'next' : 'back'} />
         </section>
       )}
       {screen === 'payment' && <PaymentMethods total={total} navigate={navigate} />}
@@ -172,7 +173,7 @@ export default function Checkout({ screen, navigate, reset, service, cart, count
       {screen === 'complete' && (
         <>
           <section className="complete-message"><h1>주문 완료</h1><p>영수증과 진동벨을 가져가세요</p><Warning /></section>
-          <Actions className="receipt-actions" back={reset} backLabel="영수증받기" next={reset} nextLabel="영수증받지않기" />
+          <Actions className="receipt-actions" back={reset} backLabel="영수증받기" next={reset} nextLabel="영수증받지않기" guide="both" />
         </>
       )}
     </CheckoutLayout>

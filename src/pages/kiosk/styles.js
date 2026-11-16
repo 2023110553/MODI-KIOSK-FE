@@ -83,17 +83,20 @@ export const KioskFrame = styled.main`
   .start-actions img { width: auto; height: 8.5cqw; }
 
   .steps {
+    --step-label-height: 3.2cqw;
+    --step-dot-gap: .75cqw;
+    --step-dot-size: 2.75cqw;
     display: grid; grid-template-columns: repeat(3, 1fr);
     height: 11.3cqw; margin: 0 14%; padding: 1.8cqw 0 0;
-    list-style: none; text-align: center; font-size: 2.78cqw;
+    list-style: none; text-align: center; font-size: 2.78cqw; line-height: var(--step-label-height);
   }
   .steps li { position: relative; }
   .steps li::before {
-    content: ''; position: absolute; top: 6.1cqw; left: 50%; width: 100%; border-top: 1px dotted var(--line);
+    content: ''; position: absolute; top: calc(var(--step-label-height) + var(--step-dot-gap) + var(--step-dot-size) / 2 - .5px); left: 50%; width: 100%; border-top: 1px dotted var(--line);
   }
   .steps li:last-child::before { display: none; }
   .step-dot {
-    position: relative; display: grid; place-items: center; margin: .75cqw auto 0; width: 2.75cqw; aspect-ratio: 1;
+    position: relative; display: grid; place-items: center; margin: var(--step-dot-gap) auto 0; width: var(--step-dot-size); aspect-ratio: 1;
     border: 1px solid var(--line); border-radius: 50%; background: var(--paper);
   }
   .steps li[data-complete='true'] .step-dot { background: var(--ink); }
@@ -170,8 +173,8 @@ export const KioskFrame = styled.main`
       margin-inline: calc(150 * var(--u));
       padding-top: calc(25 * var(--u));
     }
-    .steps li::before { top: calc(60 * var(--u)); }
-    .step-dot { margin-top: calc(9 * var(--u)); background: white; }
+    .steps { --step-dot-gap: calc(9 * var(--u)); }
+    .step-dot { background: white; }
     .categories { flex: 0 0 calc(68 * var(--u)); gap: calc(45 * var(--u)); }
     .catalog { background: white; padding-top: calc(27 * var(--u)); }
     .product-grid { top: calc(118 * var(--u)); }

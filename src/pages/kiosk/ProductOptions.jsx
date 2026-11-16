@@ -24,9 +24,10 @@ export default function ProductOptions({ product, service, onClose, onAdd, child
   const [quantity, setQuantity] = useState(1)
   const [personal, setPersonal] = useState({})
   const [draft, setDraft] = useState(null)
+  const [size, setSize] = useState(product.sizes?.[0] ?? '')
   const drink = Boolean(product.temperatures)
   const selected = Object.values(personal).filter((value) => typeof value === 'string')
-  const option = drink ? [temperature === '차갑게' ? '아이스' : '핫', '맥스', cup, ...selected, personal.bubble && '버블'].filter(Boolean).join(' | ') : ''
+  const option = drink ? [temperature === '차갑게' ? '아이스' : '핫', size, cup, ...selected, personal.bubble && '버블'].filter(Boolean).join(' | ') : ''
   const price = product.price + (personal.bubble ? 700 : 0)
 
   useEffect(() => {
@@ -136,7 +137,12 @@ export default function ProductOptions({ product, service, onClose, onAdd, child
                   </button>
                 ))}
               </fieldset>
-              <fieldset><legend>사이즈</legend><button aria-pressed="true">맥스</button></fieldset>
+              <fieldset>
+                <legend>사이즈</legend>
+                {product.sizes.map((value) => (
+                  <button key={value} aria-pressed={size === value} onClick={() => setSize(value)}>{value}</button>
+                ))}
+              </fieldset>
               <fieldset>
                 <legend>컵 선택</legend>
                 {[service === '매장' ? '머그컵' : '일회용 컵', '개인 텀블러'].map((value) => (

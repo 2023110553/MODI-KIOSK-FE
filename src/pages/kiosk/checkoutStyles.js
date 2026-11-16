@@ -60,12 +60,14 @@ export const CheckoutLayout = styled.div`
     width: calc(1001 * 100cqw / 1080); height: calc(160 * 100cqw / 1080); background: white;
     font-weight: 600; font-size: calc(40 * 100cqw / 1080);
   }
-  .more-menu span { color: var(--accent); }
+  .more-menu { color: #20352b; }
+  .more-menu span { color: #000; }
   .dessert-screen .dessert-actions {
     position: absolute; inset: auto 0 0; grid-template-columns: calc(340 * 100cqw / 1080) 1fr;
     gap: calc(16 * 100cqw / 1080); height: calc(160 * 100cqw / 1080);
   }
   .dessert-actions button { font-weight: 600; }
+  .dessert-screen .dessert-actions button + button { background: #000; color: #fff; }
 
   .review-screen { --u: calc(100cqw / 1080); position: relative; flex: 1; }
   .review-title {
@@ -202,7 +204,7 @@ export const CheckoutLayout = styled.div`
   .complete-message > p:not(.order-warning) { position: absolute; inset: calc(793 * var(--u)) 0 auto; }
   .order-warning {
     position: absolute; inset: calc(1352 * var(--u)) 0 auto; display: flex; align-items: center; justify-content: center;
-    gap: calc(8 * var(--u)); color: var(--ink); font-size: calc(50 * var(--u));
+    gap: calc(8 * var(--u)); color: #20352b; font-size: calc(50 * var(--u));
   }
   .order-warning img { width: 5.2cqw; height: auto; }
   .detail-actions.receipt-actions { grid-template-columns: calc(394 * var(--u)) 1fr; }

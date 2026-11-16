@@ -208,4 +208,5 @@ export const CheckoutLayout = styled.div`
   }
   .order-warning img { width: 5.2cqw; height: auto; }
   .detail-actions.receipt-actions { grid-template-columns: calc(394 * var(--u)) 1fr; }
+  .detail-actions.receipt-actions button + button { background: #000000; }
 `

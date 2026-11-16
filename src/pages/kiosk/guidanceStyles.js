@@ -111,7 +111,15 @@ export const guidanceStyles = css`
     }
   }
 
+  /* 색상 고대비가 켜졌을 때만: 어두운 화면에서 잘 보이도록 밝은 파랑 말풍선 + 검정 글자 (대비 약 9:1)
+     기본 모드는 위의 진한 파랑(#1747d6) 그대로 */
   &&&[data-guidance='true'][data-contrast='true'] {
-    --guide-color: #0033b8;
+    --guide-color: #4da3ff;
+
+    [data-guide='true']::before {
+      color: #000;
+      font-weight: 700;
+      box-shadow: 0 0 0 calc(3 * var(--u)) #000, 0 calc(6 * var(--u)) calc(18 * var(--u)) #000000b3;
+    }
   }
 `

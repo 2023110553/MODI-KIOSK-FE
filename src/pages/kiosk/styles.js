@@ -193,9 +193,10 @@ export const KioskFrame = styled.main`
       align-items: center;
       min-height: 0;
       margin: 0 calc(30 * var(--u)) calc(58 * var(--u));
-      border: calc(3 * var(--u)) solid #e8e8e8;
+      border: calc(3 * var(--u)) solid rgb(0 0 0 / 15%);
       border-radius: calc(30 * var(--u));
-      background: white;
+      background: rgb(255 255 255 / 20%);
+      background-clip: padding-box;
       color: black;
     }
     .order-bar div {
@@ -228,7 +229,8 @@ export const KioskFrame = styled.main`
   }
 
   &:not([data-screen='start']) { background: white; }
-  &:not([data-screen='start']) > .toolbar { color: #2d2d2d; }
+  &:not([data-screen='start']) > .toolbar,
+  .product-detail .toolbar { color: #000; }
 
   .product-detail { width: 100cqw; max-width: none; max-height: 100dvh; margin: 0 auto; padding: 0; border: 0; color: var(--ink); background: white; }
   .product-detail::backdrop { background: #20352b; }
@@ -255,11 +257,11 @@ export const KioskFrame = styled.main`
   .detail-fields fieldset { margin: 0; padding: 0; border: 0; height: calc(240 * var(--u)); }
   .detail-fields legend { height: calc(68 * var(--u)); padding: 0; font-size: calc(40 * var(--u)); line-height: normal; }
   .detail-fields fieldset button { width: calc(389 * var(--u)); height: calc(100 * var(--u)); margin-right: calc(20 * var(--u)); box-shadow: inset 0 0 0 var(--u) var(--ink); font-size: calc(40 * var(--u)); }
-  .detail-fields fieldset button[aria-pressed='true'] { background: var(--ink); color: var(--paper); }
+  .detail-fields fieldset button[aria-pressed='true'] { background: var(--ink); color: #fff; }
   .detail-fields .temperature button { width: 47%; }
   .detail-fields .temperature button:only-of-type { width: calc(554 * var(--u)); }
   .detail-fields .temperature button[data-cold='true'][aria-pressed='true'] { background: #0093ee; box-shadow: none; }
-  .detail-fields .personal-options { position: absolute; inset: auto 0 0; height: calc(100 * var(--u)); background: #eee; font-size: calc(40 * var(--u)); }
+  .detail-fields .personal-options { position: absolute; inset: auto 0 0; height: calc(100 * var(--u)); background: #e3e3e3; font-size: calc(40 * var(--u)); }
   .detail-actions { display: grid; grid-template-columns: 1fr 1fr; gap: calc(16 * var(--u)); min-height: calc(160 * var(--u)); }
   .detail-actions button { box-shadow: inset 0 0 0 var(--u) #020352ba; font-size: calc(40 * var(--u)); font-weight: 600; }
   .detail-actions button + button { box-shadow: none; background: #2d2d2d; color: white; }
@@ -278,7 +280,7 @@ export const KioskFrame = styled.main`
   .personal-heading button { position: absolute; right: 0; top: calc(6 * var(--u)); width: calc(140 * var(--u)); height: calc(36 * var(--u)); box-shadow: inset 0 0 0 var(--u) var(--ink); background: white; font-size: calc(30 * var(--u)); font-weight: 200; }
   .personal-fields fieldset { border: 0; padding: 0; margin: 0; height: calc(216 * var(--u)); }
   .personal-fields legend { height: calc(68 * var(--u)); font-size: calc(40 * var(--u)); padding: 0; }
-  .personal-choices { display: flex; justify-content: flex-end; align-items: center; gap: calc(15 * var(--u)); height: calc(100 * var(--u)); padding-inline: calc(16 * var(--u)); background: #f5f5f5; }
+  .personal-choices { display: flex; justify-content: flex-end; align-items: center; gap: calc(15 * var(--u)); height: calc(100 * var(--u)); padding-inline: calc(16 * var(--u)); background: #fff; }
   .personal-choices button { width: calc(125 * var(--u)); height: calc(36 * var(--u)); box-shadow: inset 0 0 0 var(--u) var(--ink); background: white; font-weight: 200; }
   .personal-choices:has(button:nth-child(4)) button { width: calc(104 * var(--u)); }
   .personal-choices button[aria-pressed='true'] { background: var(--ink); color: var(--paper); }

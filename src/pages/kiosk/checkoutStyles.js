@@ -130,7 +130,7 @@ export const CheckoutLayout = styled.div`
   .review-total {
     position: absolute; inset: calc(1382 * var(--u)) 0 auto; height: calc(160 * var(--u));
     display: grid; grid-template-columns: calc(323 * var(--u)) calc(364 * var(--u)) 1fr;
-    align-items: center; background: #2d2d2d; color: white; font-size: calc(40 * var(--u)); font-weight: 600;
+    align-items: center; background: #000; color: white; font-size: calc(40 * var(--u)); font-weight: 600;
   }
   .review-total > strong { padding-left: calc(40 * var(--u)); }
   .review-total div { display: flex; justify-content: space-between; align-items: baseline; padding-right: calc(48 * var(--u)); }
@@ -142,13 +142,14 @@ export const CheckoutLayout = styled.div`
     grid-template-columns: calc(532 * var(--u)) 1fr; gap: calc(16 * var(--u));
   }
   .review-actions button { font-weight: 600; }
+  .review-screen .review-actions button + button { background: #000; }
 
   .payment-total {
     position: relative; flex: 0 0 calc(193 * var(--u)); display: flex; justify-content: space-between; align-items: flex-start;
     padding: calc(39 * var(--u)) calc(40 * var(--u)) 0; text-align: center; font-size: calc(40 * var(--u)); color: black;
   }
   .payment-total strong { display: block; font-weight: 600; }
-  .payment-total span:last-child { color: #666; }
+  .payment-total span:last-child { color: #717171; }
   .payment-methods { position: relative; flex: 0 0 calc(1351 * var(--u)); background: white; }
   .payment-methods h1 { position: absolute; inset: calc(74 * var(--u)) 0 auto; text-align: center; font-size: calc(50 * var(--u)); font-weight: 600; }
   .payment-grid button {

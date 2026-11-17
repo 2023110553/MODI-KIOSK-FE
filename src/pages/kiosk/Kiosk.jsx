@@ -137,76 +137,46 @@ export default function Kiosk() {
 
   // 2. NFC 태그 감지 시 실행될 비동기 핸들러 (백엔드 API 연동)
   const onTagScanned = async (uid) => {
-    console.log('NFC UID 감지됨:', uid)
-
     try {
-      // 백엔드 API 호출 (실제 백엔드 엔드포인트 주소에 맞게 조정)
-      const KIOSK_CODE = 'KIOSK-001';
-      const response = await fetch(
-  `/api/kiosks/${KIOSK_CODE}/nfc`,
-  {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ uid }),
-  }
-);
+      const response = await fetch('/api/kiosks/KIOSK-001/nfc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid }),
+      })
 
-console.log('[NFC] HTTP 상태:', response.status);
-console.log('[NFC] 요청 URL:', response.url);
+      const responseText = await response.text()
+      if (!response.ok) {
+        throw new Error(`NFC API 실패 (HTTP ${response.status}): ${responseText}`)
+      }
 
-const responseText = await response.text();
+      const { success, message, data: kioskData } = JSON.parse(responseText)
+      if (success !== true) {
+        throw new Error(message || 'NFC 처리에 실패했습니다.')
+      }
 
-console.log('[NFC] 서버 응답 원문:', responseText);
+      if (!kioskData) {
+        throw new Error('서버 응답에 키오스크 데이터가 없습니다.')
+      }
 
-if (!response.ok) {
-  throw new Error(
-    `NFC API 실패 (HTTP ${response.status}): ${responseText}`
-  );
-}
+      const profileData = kioskData.profile ?? kioskData.settings
+      if (!profileData) {
+        throw new Error('서버 응답에서 접근성 프로필을 찾을 수 없습니다.')
+      }
 
-const responseData = JSON.parse(responseText);
-console.log('[NFC] 서버 응답:', responseData);
-
-const kioskData = responseData.data;
-
-if (!kioskData) {
-  throw new Error('서버 응답에 키오스크 데이터가 없습니다.');
-}
-
-// 실제 접근성 설정이 들어 있는 위치 확인
-console.log('[NFC] kioskData:', kioskData);
-
-const profileData = kioskData.profile ?? kioskData.settings;
-
-if (!profileData) {
-  throw new Error(
-    '서버 응답에서 접근성 프로필을 찾을 수 없습니다.'
-  );
-}
-
-setProfile({
-  ...defaultProfile,
-  contrast: profileData.highContrast ?? defaultProfile.contrast,
-  guidance: profileData.touchGuide ?? defaultProfile.guidance,
-  reach: profileData.lowerScreen ?? defaultProfile.reach,
-  large: profileData.largeText ?? defaultProfile.large,
-  touch: profileData.touchCorrection ?? defaultProfile.touch,
-});
-
-console.log('접근성 프로필 적용 완료:', profileData);
+      setProfile({
+        ...defaultProfile,
+        contrast: profileData.highContrast ?? defaultProfile.contrast,
+        guidance: profileData.touchGuide ?? defaultProfile.guidance,
+        reach: profileData.lowerScreen ?? defaultProfile.reach,
+        large: profileData.largeText ?? defaultProfile.large,
+        touch: profileData.touchCorrection ?? defaultProfile.touch,
+      })
     } catch (error) {
-  console.error('NFC 연동 에러:', error);
-  console.error('에러 이름:', error?.name);
-  console.error('에러 메시지:', error?.message);
-  console.error('에러 스택:', error?.stack);
-
-  alert(`NFC 연동 실패: ${error?.message ?? '알 수 없는 오류'}`);
-}
+      console.error('NFC 연동 에러:', error)
+      alert(`NFC 연동 실패: ${error?.message ?? '알 수 없는 오류'}`)
+    }
   }
 
-  //커스텀 훅 바인딩 (키오스크 모든 페이지에서 키보드 입력 형태의 NFC 감지 가능하게
   useNfcInput({ onTagScanned })
 
 

@@ -185,11 +185,11 @@ if (!profileData) {
 
 setProfile({
   ...defaultProfile,
-  // 현재 프론트의 simple 옵션에 대응하는
-  // 백엔드 필드는 아직 확인이 필요함
   contrast: profileData.highContrast ?? defaultProfile.contrast,
   guidance: profileData.touchGuide ?? defaultProfile.guidance,
   reach: profileData.lowerScreen ?? defaultProfile.reach,
+  large: profileData.largeText ?? defaultProfile.large,
+  touch: profileData.touchCorrection ?? defaultProfile.touch,
 });
 
 console.log('접근성 프로필 적용 완료:', profileData);
@@ -250,7 +250,6 @@ console.log('접근성 프로필 적용 완료:', profileData);
   return (
     <KioskFrame
       data-screen={screen}
-      data-simple={profile.simple}
       data-contrast={profile.contrast}
       data-guidance={profile.guidance}
       data-reach={profile.reach}

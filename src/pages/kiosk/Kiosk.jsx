@@ -6,6 +6,7 @@ import ProductOptions from './ProductOptions.jsx'
 import CartRows from './CartRows.jsx'
 import Checkout from './Checkout.jsx'
 import { KioskFrame } from './styles.js'
+import { useTouchAssist } from './touchAssist.js'
 import { useNfcInput } from '../../hooks/useNfcInput.js' // NFC 훅 임포트
 
 const START_PHOTO_MS = 5_000
@@ -103,6 +104,8 @@ export default function Kiosk() {
   const [product, setProduct] = useState(null)
   const [cart, setCart] = useState([])
   const cartScroll = useRef(null)
+  const frame = useRef(null)
+  useTouchAssist(frame, profile.touch)
   const count = cart.reduce((sum, item) => sum + item.quantity, 0)
   const total = cart.reduce((sum, item) => sum + item.quantity * item.price, 0)
   const sections = Object.keys(catalog[category])
@@ -209,11 +212,13 @@ console.log('[NFC] 응답 데이터:', responseData);
 
   return (
     <KioskFrame
+      ref={frame}
       data-screen={screen}
       data-simple={profile.simple}
       data-contrast={profile.contrast}
       data-guidance={profile.guidance}
       data-reach={profile.reach}
+      data-touch={profile.touch}
     >
       {import.meta.env.DEV && new URLSearchParams(globalThis.location?.search).has('preview') && (
         <PreviewSettings profile={profile} onChange={(key, value) => setProfile((current) => ({ ...current, [key]: value }))} />

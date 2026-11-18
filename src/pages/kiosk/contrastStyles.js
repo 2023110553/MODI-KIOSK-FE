@@ -114,10 +114,12 @@ export const contrastStyles = css`
     .steps li::before { border-top-color: var(--contrast-yellow); border-top-width: 2px; }
     .steps li[aria-current='step'] { font-weight: 700; }
 
-    /* 카테고리·하위 카테고리: 노랑 칩, 선택은 파랑 칩 */
-    .categories { align-items: center; gap: 2cqw; padding-inline: 2.6cqw; }
+    /* 카테고리·하위 카테고리: 노랑 칩, 선택은 파랑 칩
+       간격(gap)·여백은 기본·큰 글씨 모드 값을 그대로 쓰고 색만 바꿈 */
+    .categories { align-items: center; }
+    /* 카테고리 칩 안쪽 여백만큼 바깥을 당겨서 글자 위치·간격이 기본 모드와 같도록 */
+    .categories button { padding: .3cqw .8cqw; margin-inline: -.8cqw; border-radius: 1.2cqw; }
     .categories button, .subcategories button {
-      padding: .3cqw 1.2cqw; border-radius: 1.2cqw;
       background: var(--contrast-action); color: var(--contrast-action-ink);
     }
     .categories button[aria-pressed='true'], .subcategories button[aria-pressed='true'] {

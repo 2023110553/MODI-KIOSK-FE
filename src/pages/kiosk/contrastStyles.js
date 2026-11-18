@@ -236,10 +236,14 @@ export const contrastStyles = css`
       box-shadow: inset 0 0 0 2px var(--contrast-black);
     }
     .product:disabled::after { background: transparent; box-shadow: none; }
-    .pagination button:disabled {
+    /* 메뉴 페이지 이전·다음: 배경·테두리·취소선 없이 노랑 글자만 */
+    .pagination { color: var(--contrast-yellow); }
+    .pagination button, .pagination button:disabled {
       background: transparent;
+      color: var(--contrast-yellow);
+      box-shadow: none;
       outline: none;
-      text-decoration: line-through;
+      text-decoration: none;
     }
 
     /* 키보드 포커스: 파랑 */

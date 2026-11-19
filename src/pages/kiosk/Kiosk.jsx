@@ -7,6 +7,7 @@ import CartRows from './CartRows.jsx'
 import Checkout from './Checkout.jsx'
 import { KioskFrame } from './styles.js'
 import { useTouchAssist } from './touchAssist.js'
+import { useTouchGuidance } from './touchGuidance.js'
 import { useNfcInput } from '../../hooks/useNfcInput.js' // NFC 훅 임포트
 
 const START_PHOTO_MS = 5_000
@@ -152,6 +153,7 @@ export default function Kiosk() {
   const cartScroll = useRef(null)
   const frame = useRef(null)
   useTouchAssist(frame, profile.touch)
+  useTouchGuidance(frame, profile.guidance)
   const count = cart.reduce((sum, item) => sum + item.quantity, 0)
   const total = cart.reduce((sum, item) => sum + item.quantity * item.price, 0)
   const sections = Object.keys(catalog[category])

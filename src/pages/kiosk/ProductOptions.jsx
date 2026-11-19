@@ -95,7 +95,7 @@ export default function ProductOptions({ product, service, onClose, onAdd, lower
           <footer className="detail-actions">
             <button onClick={() => personalStep ? setPersonalStep(personalStep - 1) : setDraft(null)}>이전</button>
             {last
-              ? <button onClick={() => addItem(draft)}>퍼스널 옵션 저장</button>
+              ? <button data-guide data-guide-label="옵션을 다 고르셨으면 눌러 주세요" onClick={() => addItem(draft)}>퍼스널 옵션 저장</button>
               : <button onClick={() => setPersonalStep(personalStep + 1)}>다음 옵션</button>}
           </footer>
         </div>

@@ -301,8 +301,8 @@ export const KioskFrame = styled.main`
   .bubble-choice:has(input:checked) img { background: #ff933a80; }
   .bubble-choice:has(input:focus-visible) { outline: 2px solid #3260d9; }
 
-  ${contrastStyles}
   ${largeTextStyles}
   ${guidanceStyles}
   ${lowerControlsStyles}
+  ${contrastStyles}
 `

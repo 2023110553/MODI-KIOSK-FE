@@ -1,5 +1,8 @@
 import { createGlobalStyle, styled } from 'styled-components'
 import interFont from '../../assets/kiosk/InterVariable.woff2'
+// 한글 폰트: Inter에는 한글이 없어 OS 폰트(맥 Apple SD Gothic Neo, 윈도우 맑은 고딕)로 그려지며
+// 글자 폭·높이가 달라 화면이 넘치므로, Pretendard를 함께 번들해 어느 환경에서나 같게 보이도록 함
+import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css'
 import { contrastStyles } from './contrastStyles.js'
 import { guidanceStyles } from './guidanceStyles.js'
 import { largeTextStyles } from './largeTextStyles.js'
@@ -33,7 +36,7 @@ export const KioskFrame = styled.main`
   margin: auto;
   background: var(--paper);
   color: var(--ink);
-  font-family: Inter, system-ui, sans-serif;
+  font-family: Inter, 'Pretendard Variable', system-ui, sans-serif;
 
   *, *::before, *::after { box-sizing: inherit; }
   button { border: 0; padding: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }

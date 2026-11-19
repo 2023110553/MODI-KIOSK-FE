@@ -6,6 +6,7 @@ import ProductOptions from './ProductOptions.jsx'
 import CartRows from './CartRows.jsx'
 import Checkout from './Checkout.jsx'
 import { KioskFrame } from './styles.js'
+import { useTouchAssist } from './touchAssist.js'
 import { useNfcInput } from '../../hooks/useNfcInput.js' // NFC 훅 임포트
 
 const START_PHOTO_MS = 5_000
@@ -79,7 +80,12 @@ function paginate(pages, pageSize) {
 function MoreButton({ label }) {
   return (
     <button className="row-more" aria-label={`${label} 더 보기`}
-      onClick={(event) => event.currentTarget.parentElement.scrollBy({ left: event.currentTarget.parentElement.clientWidth * .7, behavior: 'smooth' })}>
+      onClick={(event) => {
+        const row = event.currentTarget.parentElement
+        const scroller = row.querySelector('.subcategory-scroll')
+        const target = scroller?.scrollWidth > scroller?.clientWidth ? scroller : row
+        target.scrollBy({ left: target.clientWidth * .7, behavior: 'smooth' })
+      }}>
       &gt;
     </button>
   )
@@ -114,6 +120,26 @@ function ProductCard({ item, onSelect }) {
   )
 }
 
+function PreviewProductImage({ item }) {
+  const crop = item.layer?.[2] ?? [0, 0, 97, 97, 97, 97]
+  const [left, top, width, height, maskWidth, maskHeight] = crop
+  const scale = 120 / maskWidth
+
+  return (
+    <span className="lower-controls-preview-image" style={{
+      width: figmaUnit(maskWidth * scale),
+      height: figmaUnit(maskHeight * scale),
+    }}>
+      <img src={kioskImage(item.image)} alt="" style={{
+        left: figmaUnit(left * scale),
+        top: figmaUnit(top * scale),
+        width: figmaUnit(width * scale),
+        height: figmaUnit(height * scale),
+      }} />
+    </span>
+  )
+}
+
 export default function Kiosk() {
   const [profile, setProfile] = useState(defaultProfile)
   const [screen, setScreen] = useState('start')
@@ -124,95 +150,72 @@ export default function Kiosk() {
   const [product, setProduct] = useState(null)
   const [cart, setCart] = useState([])
   const cartScroll = useRef(null)
+  const frame = useRef(null)
+  useTouchAssist(frame, profile.touch)
   const count = cart.reduce((sum, item) => sum + item.quantity, 0)
   const total = cart.reduce((sum, item) => sum + item.quantity * item.price, 0)
   const sections = Object.keys(catalog[category])
   const lowerControls = profile.reach && screen === 'menu'
+  const largeLayout = profile.large && (!profile.reach || screen === 'start' || screen === 'menu')
+  const standaloneReach = profile.reach && !largeLayout
   const pageSize = lowerControls
     ? (profile.large ? LOWER_CONTROLS_LARGE_PAGE_SIZE : LOWER_CONTROLS_PAGE_SIZE)
     : (profile.large ? LARGE_TEXT_PAGE_SIZE : null)
+  const showLowerCart = lowerControls && !profile.large
+  const [selectedCartKey, setSelectedCartKey] = useState(null)
+  const menuItems = (catalog[category][section] ?? []).flat()
   const pages = paginate(catalog[category][section] ?? [], pageSize)
   const currentPage = Math.min(page, Math.max(pages.length - 1, 0))
-  const products = pages[currentPage] ?? []
-  const selectedMenu = lowerControls ? cart.at(-1) : null
+  const products = standaloneReach ? menuItems : (pages[currentPage] ?? [])
+  const selectedMenu = lowerControls
+    ? (cart.find((item) => item.key === selectedCartKey) ?? cart.at(-1))
+    : null
   const step = screen === 'complete' ? 2 : screen === 'payment' ? 1 : 0
   const showSteps = ['menu', 'review', 'payment', 'complete'].includes(screen)
-  const stepLabels = lowerControls && profile.large
-    ? ['메뉴선택', '적립하기', '결제하기', '주문완료']
-    : ['메뉴선택', '결제하기', '주문완료']
+  const stepLabels = ['메뉴선택', '결제하기', '주문완료']
 
   // 2. NFC 태그 감지 시 실행될 비동기 핸들러 (백엔드 API 연동)
   const onTagScanned = async (uid) => {
-    console.log('NFC UID 감지됨:', uid)
-
     try {
-      // 백엔드 API 호출 (실제 백엔드 엔드포인트 주소에 맞게 조정)
-      const KIOSK_CODE = 'KIOSK-001';
-      const response = await fetch(
-  `/api/kiosks/${KIOSK_CODE}/nfc`,
-  {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ uid }),
-  }
-);
+      const response = await fetch('/api/kiosks/KIOSK-001/nfc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid }),
+      })
 
-console.log('[NFC] HTTP 상태:', response.status);
-console.log('[NFC] 요청 URL:', response.url);
+      const responseText = await response.text()
+      if (!response.ok) {
+        throw new Error(`NFC API 실패 (HTTP ${response.status}): ${responseText}`)
+      }
 
-const responseText = await response.text();
+      const { success, message, data: kioskData } = JSON.parse(responseText)
+      if (success !== true) {
+        throw new Error(message || 'NFC 처리에 실패했습니다.')
+      }
 
-console.log('[NFC] 서버 응답 원문:', responseText);
+      if (!kioskData) {
+        throw new Error('서버 응답에 키오스크 데이터가 없습니다.')
+      }
 
-if (!response.ok) {
-  throw new Error(
-    `NFC API 실패 (HTTP ${response.status}): ${responseText}`
-  );
-}
+      const profileData = kioskData.profile ?? kioskData.settings
+      if (!profileData) {
+        throw new Error('서버 응답에서 접근성 프로필을 찾을 수 없습니다.')
+      }
 
-const responseData = JSON.parse(responseText);
-console.log('[NFC] 서버 응답:', responseData);
-
-const kioskData = responseData.data;
-
-if (!kioskData) {
-  throw new Error('서버 응답에 키오스크 데이터가 없습니다.');
-}
-
-// 실제 접근성 설정이 들어 있는 위치 확인
-console.log('[NFC] kioskData:', kioskData);
-
-const profileData = kioskData.profile ?? kioskData.settings;
-
-if (!profileData) {
-  throw new Error(
-    '서버 응답에서 접근성 프로필을 찾을 수 없습니다.'
-  );
-}
-
-setProfile({
-  ...defaultProfile,
-  // 현재 프론트의 simple 옵션에 대응하는
-  // 백엔드 필드는 아직 확인이 필요함
-  contrast: profileData.highContrast ?? defaultProfile.contrast,
-  guidance: profileData.touchGuide ?? defaultProfile.guidance,
-  reach: profileData.lowerScreen ?? defaultProfile.reach,
-});
-
-console.log('접근성 프로필 적용 완료:', profileData);
+      setProfile({
+        ...defaultProfile,
+        contrast: profileData.highContrast ?? defaultProfile.contrast,
+        guidance: profileData.touchGuide ?? defaultProfile.guidance,
+        reach: profileData.lowerScreen ?? defaultProfile.reach,
+        large: profileData.largeText ?? defaultProfile.large,
+        touch: profileData.touchCorrection ?? defaultProfile.touch,
+      })
     } catch (error) {
-  console.error('NFC 연동 에러:', error);
-  console.error('에러 이름:', error?.name);
-  console.error('에러 메시지:', error?.message);
-  console.error('에러 스택:', error?.stack);
-
-  alert(`NFC 연동 실패: ${error?.message ?? '알 수 없는 오류'}`);
-}
+      console.error('NFC 연동 에러:', error)
+      alert(`NFC 연동 실패: ${error?.message ?? '알 수 없는 오류'}`)
+    }
   }
 
-  //커스텀 훅 바인딩 (키오스크 모든 페이지에서 키보드 입력 형태의 NFC 감지 가능하게
   useNfcInput({ onTagScanned })
 
 
@@ -228,6 +231,7 @@ console.log('접근성 프로필 적용 완료:', profileData);
     selectCategory(categories[0])
     setProduct(null)
     setCart([])
+    setSelectedCartKey(null)
     setProfile(defaultProfile)
   }
 
@@ -243,6 +247,7 @@ console.log('접근성 프로필 적용 완료:', profileData);
         ? { ...entry, quantity: entry.quantity + item.quantity }
         : entry)
     })
+    setSelectedCartKey(item.key)
     setProduct(null)
   }
 
@@ -254,16 +259,38 @@ console.log('접근성 프로필 적용 완료:', profileData);
 
   function removeItem(key) {
     setCart((items) => items.filter((item) => item.key !== key))
+    setSelectedCartKey((selected) => selected === key ? null : selected)
+  }
+
+  function changeTotalQuantity(delta) {
+    if (!selectedMenu) return
+    if (delta > 0 || selectedMenu.quantity > 1) {
+      changeQuantity(selectedMenu.key, delta)
+      return
+    }
+    removeItem(selectedMenu.key)
+  }
+
+  function selectProduct(item) {
+    if (lowerControls && profile.large) {
+      const cartItem = cart.findLast((entry) => entry.productId === item.id)
+      if (cartItem) {
+        setSelectedCartKey(cartItem.key)
+        return
+      }
+    }
+    setProduct(item)
   }
 
   return (
     <KioskFrame
+      ref={frame}
       data-screen={screen}
-      data-simple={profile.simple}
       data-contrast={profile.contrast}
       data-guidance={profile.guidance}
       data-reach={profile.reach}
-      data-large={profile.large}
+      data-touch={profile.touch}
+      data-large={largeLayout}
     >
       {import.meta.env.DEV && new URLSearchParams(globalThis.location?.search).has('preview') && (
         <PreviewSettings profile={profile} onChange={(key, value) => setProfile((current) => ({ ...current, [key]: value }))} />
@@ -286,13 +313,13 @@ console.log('접근성 프로필 적용 완료:', profileData);
               helpOnly={['card', 'remove-card'].includes(screen)}
             />
           )}
-          {(lowerControls || (profile.reach && screen === 'payment')) && (
+          {profile.reach && ['menu', 'desserts', 'review', 'payment', 'card', 'remove-card', 'bell', 'complete'].includes(screen) && (
             <aside className="lower-controls-guide">
               <img src={kioskImage('lower-controls-guide')} alt="" />
               <p>아래에서 편하게<br />선택하세요</p>
             </aside>
           )}
-          {showSteps && (!lowerControls || profile.large) && !(profile.reach && screen === 'payment') && <ol className="steps" aria-label="주문 단계">
+          {showSteps && !(profile.reach && screen !== 'menu') && <ol className="steps" aria-label="주문 단계">
             {stepLabels.map((label, index) => (
               <li key={label} data-complete={index <= step} aria-current={index === step ? 'step' : undefined}>
                 {label}
@@ -300,7 +327,7 @@ console.log('접근성 프로필 적용 완료:', profileData);
               </li>
             ))}
           </ol>}
-          {(screen === 'menu' || (profile.reach && screen === 'payment')) && (
+          {(screen === 'menu' || (profile.reach && ['payment', 'complete'].includes(screen))) && (
               <nav className="categories" aria-label="메뉴 카테고리">
                 {categories.map((label) => (
                   <button key={label} aria-pressed={label === category} onClick={() => {
@@ -308,34 +335,36 @@ console.log('접근성 프로필 적용 완료:', profileData);
                     setScreen('menu')
                   }}>{label}</button>
                 ))}
-                {(profile.large || lowerControls) && <MoreButton label="메뉴 카테고리" />}
+                {(largeLayout || lowerControls) && <MoreButton label="메뉴 카테고리" />}
               </nav>
           )}
           {screen === 'menu' ? (
             <>
-              <section className="catalog" aria-label="메뉴 목록">
+              <section className="catalog" data-lower-cart={showLowerCart} aria-label="메뉴 목록">
                 <nav className="subcategories" aria-label={`${category} 세부 메뉴`}>
-                  {(!lowerControls || sections.length !== 1 || sections[0] !== category) && sections.map((label) => (
-                    <button key={label} aria-pressed={label === section} onClick={() => {
-                      setSection(label)
-                      setPage(0)
-                    }}>{label}</button>
-                  ))}
-                  {(profile.large || lowerControls) && sections.length > 3 && <MoreButton label="세부 메뉴" />}
+                  <span className="subcategory-scroll">
+                    {(!lowerControls || sections.length !== 1 || sections[0] !== category) && sections.map((label) => (
+                      <button key={label} aria-pressed={label === section} onClick={() => {
+                        setSection(label)
+                        setPage(0)
+                      }}>{label}</button>
+                    ))}
+                  </span>
+                  {(largeLayout || lowerControls) && sections.length > 3 && <MoreButton label="세부 메뉴" />}
                 </nav>
-                <div className="product-grid">
-                  {products.map((entry) => {
+                <div className="product-grid" key={showLowerCart ? section : undefined}>
+                  {products.map((entry, index) => {
                     const item = menuProduct(entry, category, section)
-                    return <ProductCard key={item.id} item={item} onSelect={() => setProduct(item)} />
+                    return <ProductCard key={standaloneReach ? `${item.id}:${index}` : item.id} item={item} onSelect={() => selectProduct(item)} />
                   })}
                 </div>
-                {pages.length > 0 && (
+                {pages.length > 0 && !showLowerCart && !standaloneReach && (
                   <nav className="pagination" aria-label="메뉴 페이지">
                     {lowerControls && (
                       <div className="lower-controls-preview">
                         {selectedMenu ? (
                           <>
-                            <img src={kioskImage(selectedMenu.image)} alt="" />
+                            <PreviewProductImage item={selectedMenu} />
                             <span>{selectedMenu.name}</span>
                           </>
                         ) : <span>선택 메뉴</span>}
@@ -347,19 +376,33 @@ console.log('접근성 프로필 적용 완료:', profileData);
                   </nav>
                 )}
               </section>
-              <section className="cart-preview" aria-label="담은 메뉴">
+              <section className="cart-preview" data-lower-cart={showLowerCart} aria-label="담은 메뉴">
                 <div className="cart-scroll" ref={cartScroll}>
-                  <CartRows items={cart} onQuantity={changeQuantity} onRemove={removeItem} />
+                  {!profile.large && <CartRows items={cart} onQuantity={changeQuantity} onRemove={removeItem}
+                    selectedKey={selectedCartKey} onSelect={showLowerCart ? setSelectedCartKey : undefined} />}
                 </div>
-                {count > 0 && <div className="cart-scroll-buttons">
+                {count > 0 && !profile.large && !showLowerCart && <div className="cart-scroll-buttons">
                   <button aria-label="장바구니 위로" onClick={() => cartScroll.current.scrollBy({ top: -cartScroll.current.clientHeight })}>⌃</button>
                   <button aria-label="장바구니 아래로" onClick={() => cartScroll.current.scrollBy({ top: cartScroll.current.clientHeight })}>⌄</button>
                 </div>}
               </section>
-              <footer className="order-bar">
-                <div><span>총 수량</span><strong>{count}<small>개</small></strong></div>
+              <footer className="order-bar" data-lower-cart={showLowerCart}>
+                <div><span>총 수량</span>
+                  {lowerControls && profile.large && count > 0 ? (
+                    <span className="total-quantity" aria-label="장바구니 총수량">
+                      <button aria-label="장바구니 총수량 줄이기" onClick={() => changeTotalQuantity(-1)}>−</button>
+                      <strong><output>{count}</output><small>개</small></strong>
+                      <button aria-label="장바구니 총수량 늘리기" onClick={() => changeTotalQuantity(1)}>+</button>
+                    </span>
+                  ) : <strong>{count}<small>개</small></strong>}
+                </div>
                 <div><span>합계</span><strong>{total.toLocaleString('ko-KR')}<small>원</small></strong></div>
-                <button disabled={!count} data-guide={count > 0 || undefined} data-guide-label="다 고르셨으면 눌러 주세요" onClick={() => setScreen('desserts')}>주문하기</button>
+                {showLowerCart && <aside className="lower-cart-actions">
+                  <button disabled={!cart.some(item => item.key === selectedCartKey)} onClick={() => { removeItem(selectedCartKey); setSelectedCartKey(null) }}>취소하기</button>
+                  <button onClick={reset}>처음으로</button>
+                  <button disabled={!count} onClick={() => setScreen('desserts')}>주문하기</button>
+                </aside>}
+                {!showLowerCart && <button disabled={!count} data-guide={count > 0 || undefined} data-guide-label="다 고르셨으면 눌러 주세요" onClick={() => setScreen('desserts')}>주문하기</button>}
               </footer>
             </>
           ) : (
@@ -370,7 +413,7 @@ console.log('접근성 프로필 적용 완료:', profileData);
         </>
       )}
       {product && (
-        <ProductOptions key={product.id} product={product} service={service} onClose={() => setProduct(null)} onAdd={addToCart}>
+        <ProductOptions key={product.id} product={product} service={service} lowerReach={profile.reach} onClose={() => setProduct(null)} onAdd={addToCart}>
           <KioskToolbar detail onHome={reset} />
         </ProductOptions>
       )}

@@ -80,7 +80,20 @@ export const largeTextStyles = css`
     .detail-fields legend, .personal-fields legend { font-size: calc(50 * var(--u)); }
     .detail-fields fieldset button { font-size: calc(50 * var(--u)); }
     .detail-fields .personal-options { font-size: calc(48 * var(--u)); }
-    .personal-heading { font-size: calc(48 * var(--u)); }
+    /* 퍼스널옵션: 기본은 글자 27·버튼 높이 36이라 너무 작아서, 상품 옵션 버튼에 가깝게 키움
+       (화면 아래 버튼까지 여유가 있어 줄 높이도 늘림: 제목 70 + 그룹 4개 × 250 = 1070, 공간 약 1316) */
+    .personal-heading { height: calc(70 * var(--u)); font-size: calc(48 * var(--u)); line-height: calc(70 * var(--u)); }
+    .personal-heading button { top: calc(5 * var(--u)); width: calc(220 * var(--u)); height: calc(60 * var(--u)); }
+    .personal-fields fieldset { height: calc(250 * var(--u)); }
+    .personal-fields legend { height: calc(80 * var(--u)); }
+    .personal-choices { height: calc(140 * var(--u)); gap: calc(20 * var(--u)); padding-inline: calc(20 * var(--u)); }
+    .personal-choices button,
+    .personal-choices:has(button:nth-child(4)) button { flex: 1; max-width: calc(300 * var(--u)); width: auto; height: calc(100 * var(--u)); }
+    .personal-heading button span, .personal-choices button span { font-size: calc(40 * var(--u)); line-height: normal; }
+    .bubble-choice { gap: calc(24 * var(--u)); font-size: calc(44 * var(--u)); }
+    .bubble-choice img { width: calc(52 * var(--u)); }
+    /* 고대비에서 보이는 체크박스도 같은 크기로 (고대비의 높이 28보다 뒤에 적용됨) */
+    .bubble-choice input { width: calc(52 * var(--u)); height: calc(52 * var(--u)); }
 
     /* 화면 아래 버튼(이전·메뉴담기·결제하기 등) */
     .detail-actions button { font-size: calc(52 * var(--u)); }
@@ -93,7 +106,15 @@ export const largeTextStyles = css`
     .review-cart .cart-item-name small { font-size: calc(30 * var(--u)); }
     .snack-suggestions h2 { font-size: calc(48 * var(--u)); }
     .snack-suggestions button { font-size: calc(30 * var(--u)); }
-    .review-total { font-size: calc(48 * var(--u)); }
+    /* 합계 칸이 좁아 5자리 금액(12,300원)에서 '합계'가 세로로 꺾이므로, 여유 있는 총 수량 칸을 줄여 합계 칸을 넓힘 */
+    .review-total {
+      font-size: calc(48 * var(--u));
+      grid-template-columns: calc(290 * var(--u)) calc(300 * var(--u)) 1fr;
+      white-space: nowrap;
+    }
+    .review-total > strong { padding-left: calc(30 * var(--u)); }
+    .review-total div { gap: calc(16 * var(--u)); padding-right: calc(30 * var(--u)); }
+    .review-total div + div { padding-left: calc(24 * var(--u)); padding-right: calc(30 * var(--u)); }
     .review-total div strong { font-size: calc(68 * var(--u)); }
 
     /* 결제 */

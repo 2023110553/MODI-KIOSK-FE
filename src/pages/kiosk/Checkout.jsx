@@ -29,7 +29,7 @@ function Actions({ back, backLabel = '이전', next, nextLabel, disabled, classN
   )
 }
 
-function DessertSuggestions({ onAdd, onSkip, onMenu }) {
+function DessertSuggestions({ onAdd, onSkip, onMenu, reach }) {
   const [quantities, setQuantities] = useState({})
   const hasSelection = Object.values(quantities).some(Boolean)
 
@@ -41,7 +41,7 @@ function DessertSuggestions({ onAdd, onSkip, onMenu }) {
     <section className="dessert-screen">
       <h1 className="dessert-title">디저트와 함께 즐기세요</h1>
       <section className="dessert-grid">
-        {desserts.map(([name, price, image, [x, y, width, height]]) => (
+        {(reach ? desserts.slice(0, 2) : desserts).map(([name, price, image, [x, y, width, height]]) => (
           <article key={image}>
             <div className="dessert-image" style={{
               maskImage: `url("${kioskImage('dessert-image-mask', 'svg')}")`,
@@ -80,31 +80,36 @@ function DessertSuggestions({ onAdd, onSkip, onMenu }) {
   )
 }
 
-function PaymentMethods({ total, navigate }) {
+function PaymentMethods({ total, navigate, reach, reset }) {
   const amount = total.toLocaleString('ko-KR')
   return (
     <>
-      <div className="payment-total">
+      {!reach && <div className="payment-total">
         <span>총주문금액<strong>{amount}</strong></span><b>−</b>
         <span>할인금액<strong>0</strong></span><b>−</b>
         <span>결제금액<strong>0</strong></span><b>=</b>
         <span>남은결제금액<strong>{won(total)}</strong></span>
-      </div>
+      </div>}
       <section className="payment-methods">
         <h1>결제방법을 선택해주세요</h1>
         <div className="payment-grid">
           <button className="wide" onClick={() => navigate('card')}><span className="payment-logo card-logo" /> 신용카드</button>
           <button disabled>제휴카드</button>
-          <button disabled>모바일상품권/기프트카드<br />카카오페이굿딜<img src={kioskImage('payment-gift')} alt="" /></button>
+          <button disabled>{reach ? <>모바일<br />상품권</> : <>모바일상품권/기프트카드<br />카카오페이굿딜<img src={kioskImage('payment-gift')} alt="" /></>}</button>
           <button className="wide easy-payment" disabled>
-            <span><img src={kioskImage('payment-kakao')} alt="카카오페이" /><span className="payment-logo naver-logo" aria-label="네이버페이" /></span>
+            <span><img src={kioskImage('payment-kakao')} alt="카카오페이" />{!reach && <span className="payment-logo naver-logo" aria-label="네이버페이" />}</span>
             <span>간편결제<small>일부 점포 불가</small></span>
           </button>
           <button disabled>하트<small>쿠폰/바코드 할인</small><img src={kioskImage('payment-barcode')} alt="" /></button>
           <button disabled>통신사(SKT, KT, U+)<small>쿠폰/바코드 할인</small></button>
         </div>
       </section>
-      <Actions back={() => navigate('review')} />
+      {reach ? (
+        <footer className="reach-payment-navigation">
+          <button onClick={() => navigate('review')}>이전으로</button>
+          <button onClick={reset}>처음으로</button>
+        </footer>
+      ) : <Actions back={() => navigate('review')} />}
     </>
   )
 }
@@ -141,16 +146,16 @@ function Warning() {
   return <p className="order-warning"><img src={kioskImage('order-warning', 'svg')} alt="" />잊으신 물건이 없는지 확인하세요.</p>
 }
 
-export default function Checkout({ screen, navigate, reset, service, cart, count, total, onAdd, onQuantity, onRemove, onDessertMenu }) {
+export default function Checkout({ screen, navigate, reset, service, cart, count, total, onAdd, onQuantity, onRemove, onDessertMenu, reach }) {
   return (
     <CheckoutLayout>
-      {screen === 'desserts' && <DessertSuggestions onAdd={onAdd} onSkip={() => navigate('review')} onMenu={onDessertMenu} />}
+      {screen === 'desserts' && <DessertSuggestions reach={reach} onAdd={onAdd} onSkip={() => navigate('review')} onMenu={onDessertMenu} />}
       {screen === 'review' && (
         <section className="review-screen">
           <h1 className="review-title">주문 내역을 확인하고 결제하기를 누르세요</h1>
           <div className="cart-heading"><span>메뉴</span><span>수량</span><span>금액</span></div>
           <section className="review-cart"><CartRows items={cart} onQuantity={onQuantity} onRemove={onRemove} review /></section>
-          <section className="snack-suggestions">
+          {!reach && <section className="snack-suggestions">
             <h2>가볍게 즐기기 좋은 간식 어때요?</h2>
             <div>
               {snacks.map(([name, price, image]) => (
@@ -161,7 +166,7 @@ export default function Checkout({ screen, navigate, reset, service, cart, count
                 </button>
               ))}
             </div>
-          </section>
+          </section>}
           <div className="review-total">
             <strong>[{service === '매장' ? '매장이용' : '포장'}]</strong>
             <div>총 수량 <strong>{count}<small>개</small></strong></div>
@@ -171,7 +176,7 @@ export default function Checkout({ screen, navigate, reset, service, cart, count
             backGuideLabel="메뉴를 고르러 돌아가요" nextGuideLabel="결제하시려면 눌러 주세요" />
         </section>
       )}
-      {screen === 'payment' && <PaymentMethods total={total} navigate={navigate} />}
+      {screen === 'payment' && <PaymentMethods total={total} navigate={navigate} reach={reach} reset={reset} />}
       {['card', 'remove-card', 'bell'].includes(screen) && <CardPayment screen={screen} navigate={navigate} />}
       {screen === 'complete' && (
         <>

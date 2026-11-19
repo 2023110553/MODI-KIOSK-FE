@@ -6,7 +6,7 @@ import { css } from 'styled-components'
  * 페이지당 9개로 나누는 로직은 Kiosk.jsx의 paginate()
  */
 export const largeTextStyles = css`
-  &&&[data-large='true'] {
+  &&&[data-large='true']:is([data-screen='start'], [data-screen='menu']) {
     /* 진행 단계 */
     .steps {
       --step-label-height: calc(52 * var(--u));
@@ -131,5 +131,9 @@ export const largeTextStyles = css`
     /* 주문 완료 */
     .complete-message { font-size: calc(50 * var(--u)); }
     .complete-message h1 { font-size: calc(64 * var(--u)); }
+  }
+
+  &&&[data-large='true'][data-screen='desserts'] {
+    .more-menu, .dessert-actions button { font-size: calc(48 * var(--u)); }
   }
 `

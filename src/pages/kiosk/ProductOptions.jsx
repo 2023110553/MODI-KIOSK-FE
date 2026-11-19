@@ -4,7 +4,7 @@ import { kioskImage, won } from './menu.js'
 const personalGroups = [
   ['물', ['물 많이', '물 보통', '물 적게', '물 없이']],
   ['얼음량', ['얼음 많이', '얼음 보통', '얼음 적게']],
-  ['당도*', ['더 달게', '보통 당도', '덜 달게']],
+  ['당도', ['더 달게', '보통 당도', '덜 달게']],
 ]
 
 function DetailImage({ product }) {
@@ -17,13 +17,14 @@ function DetailImage({ product }) {
   )
 }
 
-export default function ProductOptions({ product, service, onClose, onAdd, children }) {
+export default function ProductOptions({ product, service, onClose, onAdd, lowerReach, children }) {
   const dialog = useRef(null)
   const [temperature, setTemperature] = useState(product.temperatures?.[0] ?? '')
   const [cup, setCup] = useState(service === '매장' ? '머그컵' : '일회용 컵')
   const [quantity, setQuantity] = useState(1)
   const [personal, setPersonal] = useState({})
   const [draft, setDraft] = useState(null)
+  const [personalStep, setPersonalStep] = useState(0)
   const [size, setSize] = useState(product.sizes?.[0] ?? '')
   const drink = Boolean(product.temperatures)
   const selected = Object.values(personal).filter((value) => typeof value === 'string')
@@ -36,13 +37,22 @@ export default function ProductOptions({ product, service, onClose, onAdd, child
     return () => element.close()
   }, [])
 
-  function addItem() {
+  function getOption(personalOptions = personal) {
+    const values = Object.values(personalOptions).filter((value) => typeof value === 'string')
+    return drink
+      ? [temperature === '차갑게' ? '아이스' : '핫', size, cup, ...values, personalOptions.bubble && '버블'].filter(Boolean).join(' | ')
+      : ''
+  }
+
+  function addItem(personalOptions = personal) {
+    const finalOption = getOption(personalOptions)
     onAdd({
-      key: `${product.id}:${option}`,
+      key: `${product.id}:${finalOption}`,
+      productId: product.id,
       image: product.image ?? product.id,
       name: product.name,
-      price,
-      option,
+      price: product.price + (personalOptions.bubble ? 700 : 0),
+      option: finalOption,
       quantity,
     })
   }
@@ -57,6 +67,39 @@ export default function ProductOptions({ product, service, onClose, onAdd, child
           ))}
         </div>
       </fieldset>
+    )
+  }
+
+  if (draft && lowerReach) {
+    const groups = [personalGroups[0], personalGroups[1], personalGroups[2], ['버블', ['추가', '추가 안함']]]
+    const [label, choices] = groups[personalStep]
+    const last = personalStep === groups.length - 1
+    const choice = last ? draft.bubble === undefined ? undefined : choices[Number(!draft.bubble)] : draft[label]
+    return (
+      <dialog className="product-detail" ref={dialog} aria-labelledby="product-title" onCancel={onClose}>
+        <div className="detail-screen lower-personal">
+          <section className="detail-summary">
+            <DetailImage product={product} />
+            <div className="detail-info"><h2 id="product-title">{product.name}</h2><p>{getOption(draft)}</p></div>
+          </section>
+          <div className="detail-fields">
+            <fieldset>
+              <legend>{label}　{personalStep + 1}/{groups.length}</legend>
+              {choices.map((value, index) => (
+                <button key={value} data-cold="true" aria-pressed={choice === value}
+                  onClick={() => setDraft(last ? { ...draft, bubble: index === 0 } : { ...draft, [label]: value })}>{value}</button>
+              ))}
+            </fieldset>
+            {last && <p>추가시 +700원</p>}
+          </div>
+          <footer className="detail-actions">
+            <button onClick={() => personalStep ? setPersonalStep(personalStep - 1) : setDraft(null)}>이전</button>
+            {last
+              ? <button onClick={() => addItem(draft)}>퍼스널 옵션 저장</button>
+              : <button onClick={() => setPersonalStep(personalStep + 1)}>다음 옵션</button>}
+          </footer>
+        </div>
+      </dialog>
     )
   }
 
@@ -137,25 +180,31 @@ export default function ProductOptions({ product, service, onClose, onAdd, child
                   </button>
                 ))}
               </fieldset>
-              <fieldset>
+              {!lowerReach && <fieldset>
                 <legend>사이즈</legend>
                 {product.sizes.map((value) => (
                   <button key={value} aria-pressed={size === value} onClick={() => setSize(value)}>{value}</button>
                 ))}
-              </fieldset>
+              </fieldset>}
               <fieldset>
                 <legend>컵 선택</legend>
                 {[service === '매장' ? '머그컵' : '일회용 컵', '개인 텀블러'].map((value) => (
                   <button key={value} aria-pressed={cup === value} onClick={() => setCup(value)}>{value}</button>
                 ))}
               </fieldset>
-              <button className="personal-options" onClick={() => setDraft(personal)}>퍼스널옵션 더보기</button>
+              {!lowerReach && <button className="personal-options" onClick={() => setDraft(personal)}>퍼스널옵션 더보기</button>}
             </>
           )}
         </div>
         <footer className="detail-actions">
           <button onClick={onClose}>주문 취소</button>
-          <button data-guide data-guide-label="장바구니에 담으려면 눌러 주세요" onClick={addItem}>메뉴담기</button>
+          <button data-guide data-guide-label="장바구니에 담으려면 눌러 주세요"
+            onClick={() => {
+              if (lowerReach && drink) {
+                setPersonalStep(0)
+                setDraft(personal)
+              } else addItem()
+            }}>메뉴담기</button>
         </footer>
       </div>
     </dialog>

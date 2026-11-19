@@ -6,6 +6,7 @@ import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css'
 import { contrastStyles } from './contrastStyles.js'
 import { guidanceStyles } from './guidanceStyles.js'
 import { largeTextStyles } from './largeTextStyles.js'
+import { lowerControlsStyles } from './lowerControlsStyles.js'
 
 export const KioskGlobalStyle = createGlobalStyle`
   @font-face {
@@ -303,4 +304,5 @@ export const KioskFrame = styled.main`
   ${contrastStyles}
   ${largeTextStyles}
   ${guidanceStyles}
+  ${lowerControlsStyles}
 `

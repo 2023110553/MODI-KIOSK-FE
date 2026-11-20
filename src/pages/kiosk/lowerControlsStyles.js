@@ -1161,4 +1161,36 @@ export const lowerControlsStyles = css`
     }
   }
 
+  /* 터치 위치 안내 + 하단 조작: 기존 레이아웃은 유지하고 말풍선 공간만 확보한다. */
+  &&&&&&[data-guidance="true"][data-reach="true"] {
+    &:not([data-large="true"])[data-screen="menu"] {
+      .lower-cart-actions .touch-guidance-target::before {
+        left: auto;
+        right: calc(285 * var(--u));
+        transform: none;
+      }
+    }
+
+    &[data-screen="desserts"] {
+      .more-menu {
+        inset-block-start: calc(700 * var(--u));
+      }
+      .dessert-actions .touch-guidance-target::before {
+        width: calc(310 * var(--u));
+        max-width: calc(310 * var(--u));
+        white-space: normal;
+        text-align: center;
+      }
+    }
+
+    &[data-screen="review"] {
+      .review-cart {
+        height: calc(490 * var(--u));
+      }
+      .review-total {
+        inset-block: auto calc(335 * var(--u));
+      }
+    }
+  }
+
 `;

@@ -47,5 +47,24 @@ export const guidanceStyles = css`
     border-bottom-color: var(--guide-surface, #1747d6);
   }
 
+  &&& .touch-guidance-bubble[data-placement='left']::after,
+  &&& .touch-guidance-bubble[data-placement='right']::after {
+    top: var(--guide-tail-y, 50%);
+    transform: translateY(-50%);
+  }
+
+  &&& .touch-guidance-bubble[data-placement='left']::after {
+    left: 100%;
+    border-right: 0;
+    border-left-color: var(--guide-surface, #1747d6);
+  }
+
+  &&& .touch-guidance-bubble[data-placement='right']::after {
+    right: 100%;
+    left: auto;
+    border-left: 0;
+    border-right-color: var(--guide-surface, #1747d6);
+  }
+
   &&& .touch-guidance-bubble[data-placement='inside']::after { display: none; }
 `

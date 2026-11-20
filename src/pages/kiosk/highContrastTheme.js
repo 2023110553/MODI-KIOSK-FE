@@ -1,4 +1,5 @@
 import { css } from "styled-components";
+import { getContrastRatio, meetsContrast } from "../../features/high-contrast/contrast.js";
 
 /*
  * 키오스크와 독립적인 고대비 팔레트 매핑.
@@ -10,6 +11,23 @@ export const highContrastPalette = Object.freeze({
   action: "#ffee00",
   selected: "#00e1ff",
 });
+
+const requiredContrastRatio = 4.5;
+export const highContrastValidation = Object.freeze({
+  actionOnCanvas: getContrastRatio(highContrastPalette.action, highContrastPalette.canvas),
+  selectedOnCanvas: getContrastRatio(highContrastPalette.selected, highContrastPalette.canvas),
+  contentOnCanvas: getContrastRatio(highContrastPalette.content, highContrastPalette.canvas),
+});
+
+for (const [name, foreground] of Object.entries({
+  actionOnCanvas: highContrastPalette.action,
+  selectedOnCanvas: highContrastPalette.selected,
+  contentOnCanvas: highContrastPalette.content,
+})) {
+  if (!meetsContrast(foreground, highContrastPalette.canvas, requiredContrastRatio)) {
+    throw new Error(`High contrast palette pair ${name} does not meet ${requiredContrastRatio}:1`);
+  }
+}
 
 export const highContrastTheme = css`
   --contrast-black: ${highContrastPalette.canvas};

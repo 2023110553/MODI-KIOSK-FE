@@ -199,7 +199,7 @@ export default function ProductOptions({ product, service, onClose, onAdd, lower
         </div>
         <footer className="detail-actions">
           <button onClick={onClose}>주문 취소</button>
-          <button data-guide data-guide-place="below" data-guide-label={kioskGuidanceMessages.addToCart}
+          <button data-guide data-guide-label={kioskGuidanceMessages.addToCart}
             onClick={() => {
               if (lowerReach && drink) {
                 setPersonalStep(0)

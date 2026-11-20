@@ -37,8 +37,6 @@ export const highContrastTheme = css`
   /* 안내 모듈은 고대비 상태를 검사하지 않고 의미 기반 색상만 소비한다. */
   --guide-surface: var(--contrast-selected);
   --guide-content: var(--contrast-action-ink);
-  --guide-outline: var(--contrast-black);
-  --guide-outline-width: calc(3 * var(--u));
   --guide-font-weight: 700;
-  --guide-shadow: 0 calc(6 * var(--u)) calc(18 * var(--u)) #000000b3;
+  --guide-shadow: 0 0 0 calc(3 * var(--u)) var(--contrast-black), 0 calc(6 * var(--u)) calc(18 * var(--u)) #000000b3;
 `;

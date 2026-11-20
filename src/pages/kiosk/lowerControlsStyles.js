@@ -393,6 +393,23 @@ export const lowerControlsStyles = css`
       position: static;
       min-height: calc(80 * var(--u));
     }
+    .product-detail .detail-screen:not(.lower-personal) {
+      min-height: calc(500 * var(--u));
+    }
+    .product-detail
+      .detail-screen:not(.lower-personal)
+      > .detail-actions {
+      margin-top: auto;
+    }
+    .product-detail:has(.detail-screen:not(.lower-personal) .temperature)
+      .detail-screen {
+      min-height: calc(790 * var(--u));
+    }
+    .product-detail:has(.detail-screen:not(.lower-personal) .temperature)
+      .detail-screen
+      > .detail-actions {
+      margin-top: auto;
+    }
     .product-detail .detail-actions button {
       font-size: calc(36 * var(--u));
     }
@@ -1164,22 +1181,42 @@ export const lowerControlsStyles = css`
   /* 터치 위치 안내 + 하단 조작: 기존 레이아웃은 유지하고 말풍선 공간만 확보한다. */
   &&&&&&[data-guidance="true"][data-reach="true"] {
     &:not([data-large="true"])[data-screen="menu"] {
-      .lower-cart-actions .touch-guidance-target::before {
+      .lower-cart-actions .touch-guidance-target::before,
+      .lower-cart-actions .touch-guidance-target::after {
         left: auto;
-        right: calc(285 * var(--u));
-        transform: none;
+        top: 50%;
+        bottom: auto;
+      }
+      .lower-cart-actions .touch-guidance-target::before {
+        right: calc(100% + 10 * var(--u));
+        width: max-content;
+        transform: translateY(-50%);
+        z-index: 2;
+      }
+      .lower-cart-actions .touch-guidance-target::after {
+        right: calc(100% - 1px);
+        width: calc(20 * var(--u));
+        height: calc(28 * var(--u));
+        transform: translateY(-50%);
+        border: 0;
+        background: var(--guide-color);
+        clip-path: polygon(0 0, 100% 50%, 0 100%);
+        z-index: 1;
       }
     }
 
     &[data-screen="desserts"] {
+      .dessert-grid {
+        inset-block-end: calc(425 * var(--u));
+        overflow-y: auto;
+        overscroll-behavior-y: contain;
+        scrollbar-width: none;
+      }
+      .dessert-grid::-webkit-scrollbar {
+        display: none;
+      }
       .more-menu {
         inset-block-start: calc(700 * var(--u));
-      }
-      .dessert-actions .touch-guidance-target::before {
-        width: calc(310 * var(--u));
-        max-width: calc(310 * var(--u));
-        white-space: normal;
-        text-align: center;
       }
     }
 
